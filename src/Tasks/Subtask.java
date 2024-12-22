@@ -3,9 +3,12 @@ package Tasks;
 public class Subtask extends Task {
     private Integer epicId;
 
-    public Subtask(Integer id, String name, String description, Integer epicId) {
-        super(id, name, description);
-        this.epicId = epicId;
+    public Subtask(String name, String description, TaskStatus status) {
+        super(name, description, status);
+    }
+
+    public Subtask(Integer id, String name, String description, TaskStatus status) {
+        super(id, name, description, status);
     }
 
     public Integer getEpicId() {

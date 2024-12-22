@@ -1,15 +1,24 @@
 package Tasks;
 
+import java.util.Objects;
+
 public class Task {
     private Integer id;
     private String name;
     private String description;
-    private TaskStatus status = TaskStatus.NEW;
+    private TaskStatus status;
 
-    public Task(Integer id, String name, String description) {
+    public Task (String name, String description, TaskStatus status) {
+        this.name = name;
+        this.description = description;
+        this.status = TaskStatus.NEW;
+    }
+
+    public Task (Integer id, String name, String description, TaskStatus status) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.status = TaskStatus.NEW;
     }
 
     public Integer getId() {
@@ -44,13 +53,48 @@ public class Task {
         this.status = status;
     }
 
-    public boolean isCompleted() {
-        return this.status == TaskStatus.DONE;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task e = (Task) o;
+        return Objects.equals(name, e.name) &&
+                Objects.equals(description, e.description) &&
+                Objects.equals(id, e.id) &&
+                Objects.equals(status, e.status);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 17;
+        if (id != null) {
+            hash = hash + id.hashCode();
+        }
+        hash = hash * 31;
+        if (name != null) {
+            hash = hash + name.hashCode();
+        }
+        hash = hash * 31;
+        if (description != null) {
+            hash = hash + description.hashCode();
+        }
+        hash = hash * 31;
+        if (status != null) {
+            hash = hash + status.hashCode();
+        }
+        hash = hash * 31;
+
+        return hash;
     }
 
     @Override
     public String toString() {
-        return "Task{" + " id = " + getId()  + ", name = " + getName() +
+        return "Task{" + " id = " + getId() + ", name = " + getName() +
                 ", description = " + getDescription() + ", status = " + getStatus() + " }";
     }
 }
+
+
+
+
+
