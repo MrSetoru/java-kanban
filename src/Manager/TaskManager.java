@@ -49,20 +49,21 @@ public class TaskManager {
         return tasks.get(id);
     }
 
-    public Subtask createSubtask(Subtask subtask, Integer epicId) {
+    public Subtask createSubtask(Subtask subtask) {
         if (subtask == null) {
             return null;
         }
-        Integer newId = generateId();
-        subtask.setId(newId);
-        subtasks.put(newId, subtask);
-        if (!epics.containsKey(epicId)) {
+        if (!epics.containsKey(subtask.getEpicId())) {
+            return subtask;
+        } else {
+            Integer newId = generateId();
+            subtask.setId(newId);
+            subtasks.put(newId, subtask);
+            Epic epic = epics.get(subtask.getId());
+            epic.addSubtask(subtask);
+            epic.updateStatus();
             return subtask;
         }
-        Epic epic = epics.get(epicId);
-        epic.addSubtask(subtask);
-        epic.updateStatus();
-        return subtask;
     }
 
     public Subtask updateSubtask(Subtask subtask) {
@@ -71,7 +72,7 @@ public class TaskManager {
         }
         final int id = subtask.getId();
         subtasks.put(id, subtask);
-        Epic epic = findEpicBySubtask(subtask.getId());
+        Epic epic = epics.get(subtask.getEpicId());
         if (epic != null) {
             epic.updateStatus();
         }
@@ -79,21 +80,21 @@ public class TaskManager {
 
     }
 
-    private Epic findEpicBySubtask(int subtaskId) {
-        for (Epic epic : epics.values()) {
-            if (epic.getSubtasks().stream().anyMatch(subtask -> subtask.getId() == subtaskId)) {
-                return epic;
-            }
-        }
-        return null;
-    }
+//    private Epic findEpicBySubtask(int subtaskId) {
+//        for (Epic epic : epics.values()) {
+//            if (epic.getSubtasks().stream().anyMatch(subtask -> subtask.getId() == subtaskId)) {
+//                return epic;
+//            }
+//        }
+//        return null;
+//    }
 
-    public Subtask deleteSubtask(Integer id) {
+    public Subtask deleteSubtask(Subtask subtask, Integer id) {
         Subtask subtaskToRemove = subtasks.remove(id);
         if (subtaskToRemove == null) {
             return null;
         }
-        Epic epic = findEpicBySubtask(id);
+        Epic epic = epics.get(subtask.getEpicId());
         if (epic != null) {
             epic.removeSubtask(subtaskToRemove);
             epic.updateStatus();
