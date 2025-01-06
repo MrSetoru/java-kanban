@@ -40,11 +40,6 @@ public static void main(String[] args) {
         subtask2Epic1.setStatus(TaskStatus.DONE);
         subtask1Epic2.setStatus(TaskStatus.IN_PROGRESS);
 
-        taskManager.updateTask(task1);
-        taskManager.updateSubtask(subtask1Epic1);
-        taskManager.updateSubtask(subtask2Epic1);
-        taskManager.updateSubtask(subtask1Epic2);
-
 
         System.out.println("\n===== Статусы - менятусы =====");
         System.out.println("Задачки: " + taskManager.findAllTask());

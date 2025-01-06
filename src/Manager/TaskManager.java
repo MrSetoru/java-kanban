@@ -20,9 +20,9 @@ public interface TaskManager {
 
     Subtask createSubtask(Subtask subtask, int id);
 
-    Subtask updateSubtask(Subtask subtask);
+    Subtask updateSubtask(int id, int epicId, Subtask subtask);
 
-    Subtask deleteSubtask(Subtask subtask, Integer id);
+    Subtask deleteSubtask(int id, int epicId);
 
     ArrayList<Subtask> findAllSubtask();
 
