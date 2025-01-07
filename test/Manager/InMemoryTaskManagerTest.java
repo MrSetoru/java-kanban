@@ -26,7 +26,7 @@ class InMemoryTaskManagerTest {
         Task task = new Task(name, description, TaskStatus.NEW);
 
         Task createdTask = taskManager.createTask(task);
-        Task actualTask = taskManager.getTaskById(createdTask.getId());
+        Task actualTask = taskManager.getTask(createdTask.getId());
 
         Assertions.assertNotNull(actualTask.getId());
         Assertions.assertEquals(actualTask.getStatus(), TaskStatus.NEW);
@@ -42,7 +42,7 @@ class InMemoryTaskManagerTest {
         Task task = new Task(name, description, TaskStatus.NEW);
 
         Task createdTask = taskManager.createTask(task);
-        Task actualTask = taskManager.getTaskById(createdTask.getId());
+        Task actualTask = taskManager.getTask(createdTask.getId());
         actualTask.setName("NewName");
         taskManager.updateTask(actualTask);
 
@@ -56,7 +56,7 @@ class InMemoryTaskManagerTest {
         Task task = new Task(name, description, TaskStatus.NEW);
 
         Task createdTask = taskManager.createTask(task);
-        Task actualTask = taskManager.getTaskById(createdTask.getId());
+        Task actualTask = taskManager.getTask(createdTask.getId());
         taskManager.deleteTask(actualTask.getId());
 
         Assertions.assertNull(taskManager.getTask(actualTask.getId()));

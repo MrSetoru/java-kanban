@@ -46,5 +46,5 @@ public interface TaskManager {
 
     void deleteTasks();
 
-    Task getTaskById(Integer id);
+   // Task getTaskById(Integer id);
 }
