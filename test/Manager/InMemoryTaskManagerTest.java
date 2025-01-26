@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 class InMemoryTaskManagerTest {
@@ -115,4 +114,44 @@ class InMemoryTaskManagerTest {
 
 
     }
+
+    @Test
+    void shouldReturnEmptyListWhenNoHistory() {
+        HistoryManager historyManager = new inMemoryHistoryManager();
+        List<Task> history = historyManager.getHistory();
+        Assertions.assertTrue(history.isEmpty());
+    }
+
+    @Test
+    void shouldNotAddNullTask() {
+        HistoryManager historyManager = new inMemoryHistoryManager();
+        Task task1 = new Task("1", "Task 1");
+        historyManager.addToHistory(task1);
+        historyManager.addToHistory(null);
+
+        List<Task> history = historyManager.getHistory();
+        Assertions.assertEquals(1, history.size());
+        Assertions.assertEquals(task1, history.get(0));
+    }
+
+    @Test
+    void shouldAddNewTask() {
+        HistoryManager historyManager = new inMemoryHistoryManager();
+        Task task = new Task("1", "Test Task");
+        historyManager.addToHistory(task);
+
+        List<Task> history = historyManager.getHistory();
+        Assertions.assertEquals(1, history.size());
+        Assertions.assertEquals(task, history.get(0));
+    }
+
+    @Test
+    void shouldNotAddNullTaskAnotherCheck() {
+        HistoryManager historyManager = new inMemoryHistoryManager();
+        historyManager.addToHistory(null);
+        List<Task> history = historyManager.getHistory();
+        Assertions.assertTrue(history.isEmpty());
+    }
+
+
 }
