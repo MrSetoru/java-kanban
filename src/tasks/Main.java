@@ -1,6 +1,6 @@
-import Manager.Managers;
-import Manager.TaskManager;
-import Tasks.*;
+import manager.Managers;
+import manager.TaskManager;
+import tasks.*;
 
 public static void main(String[] args) {
     TaskManager taskManager = Managers.getDefault();

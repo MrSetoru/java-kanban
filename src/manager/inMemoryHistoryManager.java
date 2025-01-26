@@ -1,6 +1,6 @@
-package Manager;
+package manager;
 
-import Tasks.Task;
+import tasks.Task;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
