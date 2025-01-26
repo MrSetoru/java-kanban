@@ -7,32 +7,32 @@ public class Epic extends Task {
 
     private List<Subtask> subtasks;
 
-    public Epic (String name, String description) {
+    public Epic(String name, String description) {
         super(name, description);
         this.subtasks = new ArrayList<>();
     }
 
-    public Epic (String name, String description, TaskStatus status) {
+    public Epic(String name, String description, TaskStatus status) {
         super(name, description, status);
         this.subtasks = new ArrayList<>();
     }
 
-    public List<Subtask> getSubtasks () {
+    public List<Subtask> getSubtasks() {
         return subtasks;
     }
 
-    public void addSubtask (Subtask subtask) {
+    public void addSubtask(Subtask subtask) {
         subtasks.add(subtask);
         updateStatus();
     }
 
-    public void removeSubtask (Subtask subtask) {
+    public void removeSubtask(Subtask subtask) {
         subtasks.remove(subtask);
         updateStatus();
     }
 
 
-    public void updateStatus () {
+    public void updateStatus() {
         if (subtasks.isEmpty()) {
             setStatus(TaskStatus.NEW);
             return;

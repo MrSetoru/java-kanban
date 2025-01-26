@@ -8,35 +8,35 @@ public class Task {
     private String description;
     private TaskStatus status;
 
-    public Task (String name, String description){
+    public Task(String name, String description) {
         this.name = name;
         this.description = description;
     }
 
-    public Task (String name, String description, TaskStatus status) {
+    public Task(String name, String description, TaskStatus status) {
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
     }
 
-    public Task (Integer id, String name, String description, TaskStatus status) {
+    public Task(Integer id, String name, String description, TaskStatus status) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
     }
 
-    public Task (Integer id, String name, TaskStatus status) {
+    public Task(Integer id, String name, TaskStatus status) {
         this.id = id;
         this.name = name;
         this.status = status;
     }
 
-    public Integer getId () {
+    public Integer getId() {
         return id;
     }
 
-    public void setId (Integer id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
