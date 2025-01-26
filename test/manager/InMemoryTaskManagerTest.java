@@ -117,14 +117,14 @@ class InMemoryTaskManagerTest {
 
     @Test
     void shouldReturnEmptyListWhenNoHistory () {
-        HistoryManager historyManager = new inMemoryHistoryManager();
+        HistoryManager historyManager = new InMemoryHistoryManager();
         List<Task> history = historyManager.getHistory();
         Assertions.assertTrue(history.isEmpty());
     }
 
     @Test
     void shouldNotAddNullTask () {
-        HistoryManager historyManager = new inMemoryHistoryManager();
+        HistoryManager historyManager = new InMemoryHistoryManager();
         Task task1 = new Task("1", "Task 1");
         historyManager.addToHistory(task1);
         historyManager.addToHistory(null);
@@ -136,7 +136,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     void shouldAddNewTask () {
-        HistoryManager historyManager = new inMemoryHistoryManager();
+        HistoryManager historyManager = new InMemoryHistoryManager();
         Task task = new Task("1", "Test Task");
         historyManager.addToHistory(task);
 
@@ -147,7 +147,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     void shouldNotAddNullTaskAnotherCheck () {
-        HistoryManager historyManager = new inMemoryHistoryManager();
+        HistoryManager historyManager = new InMemoryHistoryManager();
         historyManager.addToHistory(null);
         List<Task> history = historyManager.getHistory();
         Assertions.assertTrue(history.isEmpty());
