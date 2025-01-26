@@ -1,26 +1,25 @@
-package Manager;
+package manager;
 
-import Tasks.Epic;
-import Tasks.Subtask;
-import Tasks.Task;
-import Tasks.TaskStatus;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.Task;
+import tasks.TaskStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 class InMemoryTaskManagerTest {
     private TaskManager taskManager;
 
     @BeforeEach
-    public void initialManager() {
+    public void initialManager () {
         taskManager = Managers.getDefault();
     }
 
     @Test
-    public void testCreateTask() {
+    public void testCreateTask () {
         String description = "Описание задачи";
         String name = "Название задачи";
         Task task = new Task(name, description, TaskStatus.NEW);
@@ -35,7 +34,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void testUpdateTask() {
+    public void testUpdateTask () {
         String description = "Описание задачи";
         String name = "Название задачи";
         String newName = "NewName";
@@ -50,7 +49,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void testDeleteTask() {
+    public void testDeleteTask () {
         String description = "Описание задачи";
         String name = "Название задачи";
         Task task = new Task(name, description, TaskStatus.NEW);
@@ -63,7 +62,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void testCreateSubtask() {
+    public void testCreateSubtask () {
         Epic epic = new Epic("Эпик", "Описание эпика");
         int epicId = taskManager.addNewEpic(epic);
 
@@ -78,7 +77,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void testUpdateSubtask() {
+    public void testUpdateSubtask () {
         Epic epic = new Epic("Эпик", "Описание эпика");
         int epicId = taskManager.addNewEpic(epic);
         Subtask subtask = new Subtask("Подзадача", "Описание подзадачи",
@@ -98,7 +97,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void testDeleteSubtask() {
+    public void testDeleteSubtask () {
         Epic epic = new Epic("Эпик", "Описание эпика");
         int epicId = taskManager.addNewEpic(epic);
         Subtask subtask = new Subtask("Подзадача", "Описание подзадачи",
@@ -115,4 +114,44 @@ class InMemoryTaskManagerTest {
 
 
     }
+
+    @Test
+    void shouldReturnEmptyListWhenNoHistory () {
+        HistoryManager historyManager = new InMemoryHistoryManager();
+        List<Task> history = historyManager.getHistory();
+        Assertions.assertTrue(history.isEmpty());
+    }
+
+    @Test
+    void shouldNotAddNullTask () {
+        HistoryManager historyManager = new InMemoryHistoryManager();
+        Task task1 = new Task("1", "Task 1");
+        historyManager.addToHistory(task1);
+        historyManager.addToHistory(null);
+
+        List<Task> history = historyManager.getHistory();
+        Assertions.assertEquals(1, history.size());
+        Assertions.assertEquals(task1, history.get(0));
+    }
+
+    @Test
+    void shouldAddNewTask () {
+        HistoryManager historyManager = new InMemoryHistoryManager();
+        Task task = new Task("1", "Test Task");
+        historyManager.addToHistory(task);
+
+        List<Task> history = historyManager.getHistory();
+        Assertions.assertEquals(1, history.size());
+        Assertions.assertEquals(task, history.get(0));
+    }
+
+    @Test
+    void shouldNotAddNullTaskAnotherCheck () {
+        HistoryManager historyManager = new InMemoryHistoryManager();
+        historyManager.addToHistory(null);
+        List<Task> history = historyManager.getHistory();
+        Assertions.assertTrue(history.isEmpty());
+    }
+
+
 }

@@ -1,9 +1,9 @@
-package Tasks;
+package tasks;
 
 public class Subtask extends Task {
     private Integer epicId;
 
-    public Subtask(String name, String description, TaskStatus status){
+    public Subtask(String name, String description, TaskStatus status) {
         super(name, description, TaskStatus.NEW);
     }
 

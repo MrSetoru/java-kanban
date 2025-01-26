@@ -1,6 +1,6 @@
-package Manager;
+package manager;
 
-import Tasks.*;
+import tasks.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,5 +46,5 @@ public interface TaskManager {
 
     void deleteTasks();
 
-   // Task getTaskById(Integer id);
+    // Task getTaskById(Integer id);
 }

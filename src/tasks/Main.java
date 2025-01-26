@@ -1,9 +1,11 @@
-import Manager.Managers;
-import Manager.TaskManager;
-import Tasks.*;
+package tasks;
 
-public static void main(String[] args) {
-    TaskManager taskManager = Managers.getDefault();
+import manager.Managers;
+import manager.TaskManager;
+
+public class Main {
+    public static void main(String[] args) {
+        TaskManager taskManager = Managers.getDefault();
 
         Task task1 = new Task("Задача 1", "Трансерфинг Реальности", TaskStatus.NEW);
         Task task2 = new Task("Задача 2", "Чертоги Разума", TaskStatus.NEW);
@@ -59,8 +61,5 @@ public static void main(String[] args) {
         System.out.println("Задачки: " + taskManager.findAllTask());
         System.out.println("Подзадачки: " + taskManager.findAllSubtask());
         System.out.println("Многозадачки: " + taskManager.getEpics());
-
-
     }
-
-
+}
