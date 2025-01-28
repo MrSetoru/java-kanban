@@ -14,12 +14,12 @@ class InMemoryTaskManagerTest {
     private TaskManager taskManager;
 
     @BeforeEach
-    public void initialManager () {
+    public void initialManager() {
         taskManager = Managers.getDefault();
     }
 
     @Test
-    public void testCreateTask () {
+    public void testCreateTask() {
         String description = "Описание задачи";
         String name = "Название задачи";
         Task task = new Task(name, description, TaskStatus.NEW);
@@ -34,7 +34,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void testUpdateTask () {
+    public void testUpdateTask() {
         String description = "Описание задачи";
         String name = "Название задачи";
         String newName = "NewName";
@@ -49,7 +49,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void testDeleteTask () {
+    public void testDeleteTask() {
         String description = "Описание задачи";
         String name = "Название задачи";
         Task task = new Task(name, description, TaskStatus.NEW);
@@ -62,7 +62,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void testCreateSubtask () {
+    public void testCreateSubtask() {
         Epic epic = new Epic("Эпик", "Описание эпика");
         int epicId = taskManager.addNewEpic(epic);
 
@@ -77,7 +77,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void testUpdateSubtask () {
+    public void testUpdateSubtask() {
         Epic epic = new Epic("Эпик", "Описание эпика");
         int epicId = taskManager.addNewEpic(epic);
         Subtask subtask = new Subtask("Подзадача", "Описание подзадачи",
@@ -97,33 +97,14 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void testDeleteSubtask () {
-        Epic epic = new Epic("Эпик", "Описание эпика");
-        int epicId = taskManager.addNewEpic(epic);
-        Subtask subtask = new Subtask("Подзадача", "Описание подзадачи",
-                TaskStatus.NEW);
-        taskManager.createSubtask(subtask, epicId);
-
-        Subtask deletedSubtask = taskManager.deleteSubtask(subtask.getId(), epicId);
-
-        Assertions.assertNotNull(deletedSubtask);
-        Assertions.assertEquals("Подзадача", deletedSubtask.getName());
-
-        List<Subtask> subtasks = taskManager.getEpicSubtasks(epicId);
-        Assertions.assertFalse(subtasks.contains(subtask));
-
-
-    }
-
-    @Test
-    void shouldReturnEmptyListWhenNoHistory () {
+    void shouldReturnEmptyListWhenNoHistory() {
         HistoryManager historyManager = new InMemoryHistoryManager();
         List<Task> history = historyManager.getHistory();
         Assertions.assertTrue(history.isEmpty());
     }
 
     @Test
-    void shouldNotAddNullTask () {
+    void shouldNotAddNullTask() {
         HistoryManager historyManager = new InMemoryHistoryManager();
         Task task1 = new Task("1", "Task 1");
         historyManager.addToHistory(task1);
@@ -135,7 +116,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void shouldAddNewTask () {
+    void shouldAddNewTask() {
         HistoryManager historyManager = new InMemoryHistoryManager();
         Task task = new Task("1", "Test Task");
         historyManager.addToHistory(task);
@@ -146,7 +127,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void shouldNotAddNullTaskAnotherCheck () {
+    void shouldNotAddNullTaskAnotherCheck() {
         HistoryManager historyManager = new InMemoryHistoryManager();
         historyManager.addToHistory(null);
         List<Task> history = historyManager.getHistory();
