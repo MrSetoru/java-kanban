@@ -46,6 +46,4 @@ public interface TaskManager {
 
     void deleteTasks();
 
-    void getTasks();
-
 }
