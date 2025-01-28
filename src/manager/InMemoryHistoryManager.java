@@ -65,6 +65,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             next.previous = prev;
         }
     }
+
     private List<Task> getTasks() {
         List<Task> historyList = new ArrayList<>();
         Node current = first;
@@ -88,6 +89,6 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void remove(int id) {
-            removeNode(historyMap.get(id));
+        removeNode(historyMap.get(id));
     }
 }

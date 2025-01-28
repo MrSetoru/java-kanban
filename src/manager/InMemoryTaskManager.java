@@ -103,7 +103,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteSubtask(int id, int epicId) {
-        if(!epics.containsKey(epicId)) {
+        if (!epics.containsKey(epicId)) {
             return;
         }
         Epic epic = epics.get(epicId);
