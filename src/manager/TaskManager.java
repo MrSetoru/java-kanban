@@ -22,7 +22,7 @@ public interface TaskManager {
 
     Subtask updateSubtask(int id, int epicId, Subtask subtask);
 
-    void deleteSubtask(int id, int epicId);
+    void deleteSubtask(int id);
 
     ArrayList<Subtask> findAllSubtask();
 

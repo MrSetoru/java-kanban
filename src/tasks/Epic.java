@@ -26,7 +26,7 @@ public class Epic extends Task {
         updateStatus();
     }
 
-    public void removeSubtask(Subtask subtask) {
+    public void removeSubtask(int subtask) {
         subtasks.remove(subtask);
         updateStatus();
     }
