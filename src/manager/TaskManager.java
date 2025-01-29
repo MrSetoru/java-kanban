@@ -1,6 +1,6 @@
-package Manager;
+package manager;
 
-import Tasks.*;
+import tasks.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ public interface TaskManager {
 
     void updateTask(Task task);
 
-    Task deleteTask(Integer id);
+    void deleteTask(Integer id);
 
     ArrayList<Task> findAllTask();
 
@@ -22,7 +22,7 @@ public interface TaskManager {
 
     Subtask updateSubtask(int id, int epicId, Subtask subtask);
 
-    Subtask deleteSubtask(int id, int epicId);
+    void deleteSubtask(int id);
 
     ArrayList<Subtask> findAllSubtask();
 
@@ -46,5 +46,4 @@ public interface TaskManager {
 
     void deleteTasks();
 
-   // Task getTaskById(Integer id);
 }

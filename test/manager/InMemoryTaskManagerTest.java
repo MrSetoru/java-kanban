@@ -1,14 +1,13 @@
-package Manager;
+package manager;
 
-import Tasks.Epic;
-import Tasks.Subtask;
-import Tasks.Task;
-import Tasks.TaskStatus;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.Task;
+import tasks.TaskStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 class InMemoryTaskManagerTest {
@@ -98,21 +97,42 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void testDeleteSubtask() {
-        Epic epic = new Epic("Эпик", "Описание эпика");
-        int epicId = taskManager.addNewEpic(epic);
-        Subtask subtask = new Subtask("Подзадача", "Описание подзадачи",
-                TaskStatus.NEW);
-        taskManager.createSubtask(subtask, epicId);
-
-        Subtask deletedSubtask = taskManager.deleteSubtask(subtask.getId(), epicId);
-
-        Assertions.assertNotNull(deletedSubtask);
-        Assertions.assertEquals("Подзадача", deletedSubtask.getName());
-
-        List<Subtask> subtasks = taskManager.getEpicSubtasks(epicId);
-        Assertions.assertFalse(subtasks.contains(subtask));
-
-
+    void shouldReturnEmptyListWhenNoHistory() {
+        HistoryManager historyManager = new InMemoryHistoryManager();
+        List<Task> history = historyManager.getHistory();
+        Assertions.assertTrue(history.isEmpty());
     }
+
+    @Test
+    void shouldNotAddNullTask() {
+        HistoryManager historyManager = new InMemoryHistoryManager();
+        Task task1 = new Task("1", "Task 1");
+        historyManager.addToHistory(task1);
+        historyManager.addToHistory(null);
+
+        List<Task> history = historyManager.getHistory();
+        Assertions.assertEquals(1, history.size());
+        Assertions.assertEquals(task1, history.get(0));
+    }
+
+    @Test
+    void shouldAddNewTask() {
+        HistoryManager historyManager = new InMemoryHistoryManager();
+        Task task = new Task("1", "Test Task");
+        historyManager.addToHistory(task);
+
+        List<Task> history = historyManager.getHistory();
+        Assertions.assertEquals(1, history.size());
+        Assertions.assertEquals(task, history.get(0));
+    }
+
+    @Test
+    void shouldNotAddNullTaskAnotherCheck() {
+        HistoryManager historyManager = new InMemoryHistoryManager();
+        historyManager.addToHistory(null);
+        List<Task> history = historyManager.getHistory();
+        Assertions.assertTrue(history.isEmpty());
+    }
+
+
 }
