@@ -2,6 +2,7 @@ package tasks;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Epic extends Task {
 
@@ -37,24 +38,40 @@ public class Epic extends Task {
             setStatus(TaskStatus.NEW);
             return;
         }
-        boolean allDone = true;
-        boolean allNew = true;
 
+        TaskStatus newStatus = TaskStatus.DONE;
         for (Subtask subtask : subtasks) {
-            if (subtask.getStatus() != TaskStatus.DONE) {
-                allDone = false;
+            if (subtask.getStatus() == TaskStatus.NEW || subtask.getStatus() == TaskStatus.IN_PROGRESS) {
+                newStatus = TaskStatus.IN_PROGRESS;
+                break;
             }
-            if (subtask.getStatus() != TaskStatus.NEW) {
-                allNew = false;
-            }
-
         }
-        if (allDone) {
-            setStatus(TaskStatus.DONE);
-        } else if (allNew) {
-            setStatus(TaskStatus.NEW);
-        } else {
-            setStatus(TaskStatus.IN_PROGRESS);
-        }
+        setStatus(newStatus);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Epic epic = (Epic) o;
+        return Objects.equals(subtasks, epic.subtasks);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), subtasks);
+    }
+
+    @Override
+    public String toString() {
+        return "Epic{" +
+                "name='" + getName() + '\'' +
+                ", description='" + getDescription() + '\'' +
+                ", id=" + getId() +
+                ", status=" + getStatus() +
+                ", subtasks=" + subtasks +
+                '}';
+    }
+
 }
