@@ -17,19 +17,18 @@ import java.nio.charset.StandardCharsets;
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private File data;
-    private int countId = 1;
 
-    public FileBackedTaskManager(File file, InMemoryHistoryManager historyManager) {
-        super(historyManager);
+    public FileBackedTaskManager(File file) {
+        super();
         this.data = file;
     }
 
     public static FileBackedTaskManager loadFromFile(File file) {
-        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file, new InMemoryHistoryManager());
+        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
         int maxId = 0;
 
         try {
-            List<String> lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
+            List<String> lines = Files.readAllLines(file.toPath());
             if (lines.isEmpty()) {
                 return fileBackedTaskManager;
             }
@@ -37,27 +36,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             for (int i = 1; i < lines.size(); i++) {
                 String line = lines.get(i);
                 Task task = fileBackedTaskManager.fromString(line);
-                if (task != null) {
-                    if (task.getId() > maxId) {
-                        maxId = task.getId();
-                    }
-                }
+                fileBackedTaskManager.addTask(task);
             }
 
-            for (Subtask subtask : fileBackedTaskManager.subtasks.values()) {
-                Epic epic = fileBackedTaskManager.epics.get(subtask.getEpicId());
-                if (epic != null) {
-                    epic.getSubtasks().add(subtask);
-                    epic.updateStatus();
-                }
+            for (Epic epic : fileBackedTaskManager.epics.values()) {
+                epic.updateStatus();
             }
-
             fileBackedTaskManager.countId = Math.max(fileBackedTaskManager.countId, maxId + 1);
             return fileBackedTaskManager;
 
         } catch (IOException e) {
             String errorMessage = "Ошибка при инициализации файла: " + e.getMessage();
-            System.out.println(errorMessage);
             throw new FileManagerInitializationException(errorMessage);
         }
     }
@@ -65,11 +54,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public String taskToString(Task task) {
         StringBuilder sb = new StringBuilder();
         sb.append(task.getId()).append(",");
-        sb.append(getTaskType(task)).append(",");
+        sb.append(task.getType()).append(",");
         sb.append(task.getName()).append(",");
         sb.append(task.getStatus()).append(",");
         sb.append(task.getDescription()).append(",");
-        if (task instanceof Subtask) {
+        if (task.getType() == TaskType.SUBTASK) {
             Integer epicId = ((Subtask) task).getEpicId();
             if (epicId != null) {
                 sb.append(epicId);
@@ -79,25 +68,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return sb.toString();
     }
 
-    private TaskType getTaskType(Task task) {
-        if (task instanceof Epic) {
-            return TaskType.EPIC;
-        } else if (task instanceof Subtask) {
-            return TaskType.SUBTASK;
-        } else {
-            return TaskType.TASK;
-        }
-    }
-
-    protected Task fromString(String line) {
+    private Task fromString(String line) {
         if (line.equals("id,type,name,status,description,epic")) {
             return null;
         }
 
         String[] parts = line.split(",");
         if (parts.length < 5 || parts.length > 6) {
-            System.out.println("Неверное количество аргументов в строке: " + line);
-            return null;
+            String errorMessage = "Неверное количество аргументов в строке: " + line;
+            throw new FileManagerInitializationException(errorMessage);
         }
 
         try {
@@ -111,8 +90,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 try {
                     epicId = Integer.parseInt(parts[5]);
                 } catch (NumberFormatException e) {
-                    System.out.println("Неверный формат epicId в строке: " + line);
-                    return null;
+                    String errorMessage = "Неверный формат epicId в строке: " + line + e.getMessage();
+                    throw new FileManagerInitializationException(errorMessage);
                 }
             }
 
@@ -120,31 +99,44 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 case TASK:
                     Task task = new Task(name, description, status);
                     task.setId(id);
-                    tasks.put(id, task);
                     return task;
                 case EPIC:
                     Epic epic = new Epic(name, description);
                     epic.setId(id);
                     epic.setStatus(status);
-                    epics.put(id, epic);
                     return epic;
                 case SUBTASK:
                     if (epicId == null) {
-                        System.out.println("Отсутствует epicId для подзадачи: " + line);
-                        return null;
+                        String errorMessage = "Отсутствует epicId для подзадачи: " + line;
+                        throw new FileManagerInitializationException(errorMessage);
                     }
                     Subtask subtask = new Subtask(id, name, description, epicId);
                     subtask.setStatus(status);
                     subtask.setEpicId(epicId);
-                    subtasks.put(id, subtask);
                     return subtask;
                 default:
-                    System.out.println("Неизвестный тип задачи: " + type);
-                    return null;
+                    String errorMessage = "Неизвестный тип задачи: " + type;
+                    throw new FileManagerInitializationException(errorMessage);
             }
         } catch (Exception e) {
-            System.out.println("Ошибка при парсинге строки: " + line + " " + e.getMessage());
-            return null;
+            String errorMessage = "Ошибка при парсинге строки: " + line + " " + e.getMessage();
+            throw new FileManagerInitializationException(errorMessage);
+        }
+    }
+
+    private void addTask(Task task) {
+        if (task == null) {
+            return;
+        }
+
+        if (task instanceof Epic) {
+            Epic epic = (Epic) task;
+            epics.put(epic.getId(), epic);
+        } else if (task instanceof Subtask) {
+            Subtask subtask = (Subtask) task;
+            subtasks.put(subtask.getId(), subtask);
+        } else {
+            tasks.put(task.getId(), task);
         }
     }
 
@@ -153,15 +145,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         try {
             Files.write(data.toPath(), "id,type,name,status,description,epic\n".getBytes(StandardCharsets.UTF_8));
             for (Task task : tasks.values()) {
-                Files.write(data.toPath(), taskToString(task).getBytes(StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.APPEND);
+                Files.write(data.toPath(), taskToString(task).getBytes(StandardCharsets.UTF_8),
+                        java.nio.file.StandardOpenOption.APPEND);
             }
 
             for (Epic epic : epics.values()) {
-                Files.write(data.toPath(), taskToString(epic).getBytes(StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.APPEND);
+                Files.write(data.toPath(), taskToString(epic).getBytes(StandardCharsets.UTF_8),
+                        java.nio.file.StandardOpenOption.APPEND);
             }
 
             for (Subtask subtask : subtasks.values()) {
-                Files.write(data.toPath(), taskToString(subtask).getBytes(StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.APPEND);
+                Files.write(data.toPath(), taskToString(subtask).getBytes(StandardCharsets.UTF_8),
+                        java.nio.file.StandardOpenOption.APPEND);
             }
 
         } catch (IOException e) {
@@ -245,11 +240,4 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         super.deleteTasks();
         save();
     }
-
-    @Override
-    protected Integer generateId() {
-        return countId++;
-    }
-
-
 }
