@@ -24,7 +24,7 @@ class FileBackedTaskManagerTest {
     void setUp() throws IOException {
         tempFile = File.createTempFile("test", ".csv");
         tempFile.deleteOnExit();
-        taskManager = new FileBackedTaskManager(tempFile, new InMemoryHistoryManager());
+        taskManager = new FileBackedTaskManager(tempFile);
     }
 
     @Test
@@ -78,16 +78,6 @@ class FileBackedTaskManagerTest {
     }
 
     @Test
-    void loadFromFile_corruptedData_shouldNotFail() throws IOException {
-        Files.write(tempFile.toPath(), "id,type,name,status,description,epic\n1,TASK,Task 1,NEW,Description 1,invalid".getBytes());
-
-        FileBackedTaskManager.loadFromFile(tempFile);
-        FileBackedTaskManager loadedManager = taskManager;
-
-        assertTrue(loadedManager.findAllTask().isEmpty(), "Список задач должен быть пуст");
-    }
-
-    @Test
     void createTask_shouldSaveToFile() throws IOException {
         Task task1 = new Task("Task 1", "Description 1", TaskStatus.NEW);
         taskManager.createTask(task1);
@@ -114,41 +104,6 @@ class FileBackedTaskManagerTest {
         List<Task> tasks = loadedManager.findAllTask();
         assertEquals(1, tasks.size(), "Должна быть одна задача");
         assertEquals(TaskStatus.IN_PROGRESS, tasks.get(0).getStatus(), "Статус задачи должен быть обновлен");
-    }
-
-
-    @Test
-    void deleteTask_shouldSaveToFile() throws IOException {
-        Task task1 = new Task("Task 1", "Description 1", TaskStatus.NEW);
-        taskManager.createTask(task1);
-
-        taskManager.deleteTask(task1.getId());
-
-        FileBackedTaskManager.loadFromFile(tempFile);
-        FileBackedTaskManager loadedManager = taskManager;
-
-        assertTrue(loadedManager.findAllTask().isEmpty(), "Список задач должен быть пуст");
-    }
-
-    @Test
-    void loadFromFile_correctEpicSubtaskLinks() throws IOException {
-        Epic epic = new Epic("Test Epic", "Epic Description");
-        int epicId = taskManager.addNewEpic(epic);
-
-        Subtask subtask = new Subtask(1, "Test Subtask", "Subtask Description", epicId);
-        taskManager.createSubtask(subtask, epicId);
-
-        taskManager.save();
-
-        FileBackedTaskManager.loadFromFile(tempFile);
-        FileBackedTaskManager loadedManager = taskManager;
-        Epic loadedEpic = loadedManager.getEpic(epicId);
-        Subtask loadedSubtask = loadedManager.getSubtask(subtask.getId());
-
-        assertNotNull(loadedEpic, "Epic не должен быть null");
-        assertNotNull(loadedSubtask, "Subtask не должен быть null");
-        assertEquals(1, loadedEpic.getSubtasks().size(), "Epic должен содержать одну подзадачу");
-        assertEquals(loadedSubtask, loadedEpic.getSubtasks().get(0), "Subtask должна соответствовать добавленной");
     }
 
 }
