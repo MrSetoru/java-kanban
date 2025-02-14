@@ -2,6 +2,8 @@ package manager;
 
 public class Managers {
 
+    private static InMemoryHistoryManager inMemoryHistoryManager;
+
     private Managers() {
     }
 
