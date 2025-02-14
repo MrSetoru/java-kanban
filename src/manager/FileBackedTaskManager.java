@@ -69,9 +69,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private Task fromString(String line) {
-        if (line.equals("id,type,name,status,description,epic")) {
-            return null;
-        }
 
         String[] parts = line.split(",");
         if (parts.length < 5 || parts.length > 6) {
@@ -129,14 +126,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             return;
         }
 
-        if (task instanceof Epic) {
-            Epic epic = (Epic) task;
-            epics.put(epic.getId(), epic);
-        } else if (task instanceof Subtask) {
-            Subtask subtask = (Subtask) task;
-            subtasks.put(subtask.getId(), subtask);
-        } else {
-            tasks.put(task.getId(), task);
+        switch (task.getType()) {
+            case TASK:
+                tasks.put(task.getId(), task);
+                break;
+            case EPIC:
+                Epic epic = (Epic) task;
+                epics.put(epic.getId(), epic);
+                break;
+            case SUBTASK:
+                Subtask subtask = (Subtask) task;
+                subtasks.put(subtask.getId(), subtask);
+                break;
+            default:
+                throw new IllegalArgumentException("Неизвестный тип задачи: " + task.getType());
         }
     }
 
