@@ -1,5 +1,7 @@
 package tasks;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
@@ -7,6 +9,8 @@ public class Task {
     private String name;
     private String description;
     private TaskStatus status;
+    private LocalDateTime startTime;
+    private Duration duration;
 
     public Task(String name, String description) {
         this.name = name;
@@ -19,11 +23,21 @@ public class Task {
         this.status = TaskStatus.NEW;
     }
 
-    public Task(Integer id, String name, String description, TaskStatus status) {
+    public Task(String name, String description, TaskStatus status, LocalDateTime startTime, Duration duration) {
+        this.name = name;
+        this.description = description;
+        this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
+    public Task(Integer id, String name, String description, TaskStatus status, LocalDateTime startTime, Duration duration) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.status = TaskStatus.NEW;
+        this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
     public Task(Integer id, String name, TaskStatus status) {
@@ -69,6 +83,22 @@ public class Task {
         return TaskType.TASK;
     }
 
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -77,7 +107,9 @@ public class Task {
         return Objects.equals(name, e.name) &&
                 Objects.equals(description, e.description) &&
                 Objects.equals(id, e.id) &&
-                Objects.equals(status, e.status);
+                Objects.equals(status, e.status) &&
+                Objects.equals(startTime, e.startTime) &&
+                Objects.equals(duration, e.duration);
     }
 
     @Override
@@ -99,6 +131,14 @@ public class Task {
             hash = hash + status.hashCode();
         }
         hash = hash * 31;
+        if (startTime != null) {
+            hash = hash + startTime.hashCode();
+        }
+        hash = hash * 31;
+        if (duration != null) {
+            hash = hash + duration.hashCode();
+        }
+        hash = hash * 31;
 
         return hash;
     }
@@ -106,7 +146,8 @@ public class Task {
     @Override
     public String toString() {
         return "Task{" + " id = " + getId() + ", name = " + getName() +
-                ", description = " + getDescription() + ", status = " + getStatus() + " }";
+                ", description = " + getDescription() + ", status = " + getStatus() + "startTime = " +
+                getStartTime() + "duration = " + getDuration() + " }";
     }
 }
 
