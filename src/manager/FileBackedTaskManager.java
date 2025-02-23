@@ -11,12 +11,17 @@ import tasks.TaskType;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private File data;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     public FileBackedTaskManager(File file) {
         super();
@@ -36,7 +41,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             for (int i = 1; i < lines.size(); i++) {
                 String line = lines.get(i);
                 Task task = fileBackedTaskManager.fromString(line);
-                fileBackedTaskManager.addTask(task);
+                if (task != null) {
+                    fileBackedTaskManager.addTask(task);
+                    maxId = Math.max(maxId, task.getId());
+                }
             }
 
             for (Epic epic : fileBackedTaskManager.epics.values()) {
@@ -64,17 +72,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 sb.append(epicId);
             }
         }
-        sb.append(",\n");
+        sb.append(",").append(task.getStartTime().format(FORMATTER)).append(",");
+        sb.append(task.getDuration().toString()).append("\n");
         return sb.toString();
     }
 
     private Task fromString(String line) {
-        if (line.equals("id,type,name,status,description,epic")) {
+        if (line.equals("id,type,name,status,description,epic,startTime,duration")) {
             return null;
         }
 
         String[] parts = line.split(",");
-        if (parts.length < 5 || parts.length > 6) {
+        if (parts.length < 7 || parts.length > 8) {
             String errorMessage = "Неверное количество аргументов в строке: " + line;
             throw new FileManagerInitializationException(errorMessage);
         }
@@ -87,21 +96,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             String description = parts[4];
             Integer epicId = null;
             if (parts.length == 6 && !parts[5].isEmpty()) {
-                try {
-                    epicId = Integer.parseInt(parts[5]);
-                } catch (NumberFormatException e) {
-                    String errorMessage = "Неверный формат epicId в строке: " + line + e.getMessage();
-                    throw new FileManagerInitializationException(errorMessage);
-                }
+                epicId = Integer.parseInt(parts[5]);
             }
+            LocalDateTime startTime = LocalDateTime.parse(parts[6], FORMATTER);
+            Duration duration = Duration.parse(parts[7]);
 
             switch (type) {
                 case TASK:
-                    Task task = new Task(name, description, status);
+                    Task task = new Task(name, description, status, startTime, duration);
                     task.setId(id);
                     return task;
                 case EPIC:
-                    Epic epic = new Epic(name, description);
+                    Epic epic = new Epic(name, description, startTime, duration);
                     epic.setId(id);
                     epic.setStatus(status);
                     return epic;
@@ -110,7 +116,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                         String errorMessage = "Отсутствует epicId для подзадачи: " + line;
                         throw new FileManagerInitializationException(errorMessage);
                     }
-                    Subtask subtask = new Subtask(id, name, description, epicId);
+                    Subtask subtask = new Subtask(id, name, description, epicId, startTime, duration);
                     subtask.setStatus(status);
                     subtask.setEpicId(epicId);
                     return subtask;
@@ -118,7 +124,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     String errorMessage = "Неизвестный тип задачи: " + type;
                     throw new FileManagerInitializationException(errorMessage);
             }
-        } catch (Exception e) {
+        } catch (DateTimeParseException | IllegalArgumentException e) {
             String errorMessage = "Ошибка при парсинге строки: " + line + " " + e.getMessage();
             throw new FileManagerInitializationException(errorMessage);
         }
@@ -143,7 +149,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     protected void save() {
         try {
-            Files.write(data.toPath(), "id,type,name,status,description,epic\n".getBytes(StandardCharsets.UTF_8));
+            Files.write(data.toPath(), "id,type,name,status,description,epic,startTime,duration\n".getBytes(StandardCharsets.UTF_8));
             for (Task task : tasks.values()) {
                 Files.write(data.toPath(), taskToString(task).getBytes(StandardCharsets.UTF_8),
                         java.nio.file.StandardOpenOption.APPEND);
@@ -191,6 +197,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
+    public void updateEpic(Epic epic) {
+        super.updateEpic(epic);
+        save();
+    }
+
+    @Override
     public Subtask updateSubtask(int id, int epicId, Subtask subtask) {
         super.updateSubtask(id, epicId, subtask);
         save();
@@ -209,12 +221,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         int epicId = super.addNewEpic(epic);
         save();
         return epicId;
-    }
-
-    @Override
-    public void updateEpic(Epic epic) {
-        super.updateEpic(epic);
-        save();
     }
 
     @Override

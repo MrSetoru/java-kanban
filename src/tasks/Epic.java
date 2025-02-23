@@ -55,6 +55,50 @@ public class Epic extends Task {
         setStatus(newStatus);
     }
 
+    private void updateEpicTime() {
+        if (subtasks.isEmpty()) {
+            setStartTime(LocalDateTime.now());
+            setDuration(Duration.ZERO);
+            return;
+        }
+
+        LocalDateTime earliestStart = null;
+        LocalDateTime latestEnd = null;
+
+        for (Subtask subtask : subtasks) {
+            LocalDateTime subtaskStart = subtask.getStartTime();
+            Duration subtaskDuration = subtask.getDuration();
+            LocalDateTime subtaskEnd = subtaskStart.plus(subtaskDuration);
+
+            if (earliestStart == null || subtaskStart.isBefore(earliestStart)) {
+                earliestStart = subtaskStart;
+            }
+
+            if (latestEnd == null || subtaskEnd.isAfter(latestEnd)) {
+                latestEnd = subtaskEnd;
+            }
+        }
+
+        setStartTime(earliestStart);
+        setDuration(Duration.between(earliestStart, latestEnd));
+    }
+
+    public LocalDateTime getStartTime() {
+        return super.getStartTime();
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        super.setStartTime(startTime);
+    }
+
+    public Duration getDuration() {
+        return super.getDuration();
+    }
+
+    public void setDuration(Duration duration) {
+        super.setDuration(duration);
+    }
+
     @Override
     public TaskType getType() {
         return TaskType.EPIC;
