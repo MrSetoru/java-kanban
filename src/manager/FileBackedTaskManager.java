@@ -41,10 +41,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             for (int i = 1; i < lines.size(); i++) {
                 String line = lines.get(i);
                 Task task = fileBackedTaskManager.fromString(line);
-                if (task != null) {
-                    fileBackedTaskManager.addTask(task);
-                    maxId = Math.max(maxId, task.getId());
-                }
+                fileBackedTaskManager.addTask(task);
+
             }
 
             for (Epic epic : fileBackedTaskManager.epics.values()) {
@@ -83,7 +81,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
 
         String[] parts = line.split(",");
-        if (parts.length < 7 || parts.length > 8) {
+        if (parts.length < 5 || parts.length > 6) {
             String errorMessage = "Неверное количество аргументов в строке: " + line;
             throw new FileManagerInitializationException(errorMessage);
         }
@@ -96,8 +94,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             String description = parts[4];
             Integer epicId = null;
             if (parts.length == 6 && !parts[5].isEmpty()) {
-                epicId = Integer.parseInt(parts[5]);
-            }
+                try {
+                    epicId = Integer.parseInt(parts[5]);
+                } catch (NumberFormatException e) {
+                    String errorMessage = "Неверный формат epicId в строке: " + line + e.getMessage();
+                    throw new FileManagerInitializationException(errorMessage);
+                }            }
             LocalDateTime startTime = LocalDateTime.parse(parts[6], FORMATTER);
             Duration duration = Duration.parse(parts[7]);
 
