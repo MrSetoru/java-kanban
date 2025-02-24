@@ -99,7 +99,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 } catch (NumberFormatException e) {
                     String errorMessage = "Неверный формат epicId в строке: " + line + e.getMessage();
                     throw new FileManagerInitializationException(errorMessage);
-                }            }
+                }
+            }
             LocalDateTime startTime = LocalDateTime.parse(parts[6], FORMATTER);
             Duration duration = Duration.parse(parts[7]);
 
