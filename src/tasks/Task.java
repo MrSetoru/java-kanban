@@ -12,10 +12,6 @@ public class Task {
     private LocalDateTime startTime;
     private Duration duration;
 
-    public Task(String name, String description) {
-        this.name = name;
-        this.description = description;
-    }
 
     public Task(String name, String description, TaskStatus status) {
         this.name = name;
@@ -31,21 +27,12 @@ public class Task {
         this.duration = duration;
     }
 
-    public Task(Integer id, String name, String description, TaskStatus status, LocalDateTime startTime, Duration duration) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.status = status;
-        this.startTime = startTime;
-        this.duration = duration;
+    public LocalDateTime getEndTime() {
+        if (startTime == null || duration == null) {
+            throw new IllegalStateException("Невозможно вычислить endTime. startTime или duration не установлены.");
+        }
+        return startTime.plus(duration);
     }
-
-    public Task(Integer id, String name, TaskStatus status) {
-        this.id = id;
-        this.name = name;
-        this.status = status;
-    }
-
 
     public Integer getId() {
         return id;
