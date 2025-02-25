@@ -9,6 +9,7 @@ import java.util.Objects;
 public class Epic extends Task {
 
     private List<Subtask> subtasks;
+    private LocalDateTime endTime;
 
     public Epic(String name, String description) {
         this(name, description, LocalDateTime.now(), Duration.ofMinutes(0));
@@ -17,11 +18,7 @@ public class Epic extends Task {
     public Epic(String name, String description, LocalDateTime startTime, Duration duration) {
         super(name, description, TaskStatus.NEW, startTime, duration);
         this.subtasks = new ArrayList<>();
-    }
-
-    public Epic(String name, String description, TaskStatus status, LocalDateTime startTime, Duration duration) {
-        super(name, description, status, startTime, duration);
-        this.subtasks = new ArrayList<>();
+        this.endTime = startTime.plus(duration);
     }
 
     public List<Subtask> getSubtasks() {
@@ -31,13 +28,38 @@ public class Epic extends Task {
     public void addSubtask(Subtask subtask) {
         subtasks.add(subtask);
         updateStatus();
+        updateEndTime();
     }
 
     public void removeSubtask(int subtask) {
         subtasks.remove(subtask);
         updateStatus();
+        updateEndTime();
     }
 
+    public void updateEndTime() {
+        if (subtasks.isEmpty()) {
+            endTime = getStartTime().plus(getDuration());
+            return;
+        }
+
+        LocalDateTime latestEndTime = subtasks.get(0).getStartTime().plus(subtasks.get(0).getDuration());
+        for (Subtask subtask : subtasks) {
+            LocalDateTime subtaskEndTime = subtask.getStartTime().plus(subtask.getDuration());
+            if (subtaskEndTime.isAfter(latestEndTime)) {
+                latestEndTime = subtaskEndTime;
+            }
+        }
+        endTime = latestEndTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
 
     public void updateStatus() {
         if (subtasks.isEmpty()) {
