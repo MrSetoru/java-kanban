@@ -13,7 +13,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     private HistoryManager historyManager = Managers.getDefaultHistory();
 
-    protected final Set<Task> prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
+    protected final Set<Task> prioritizedTasks = new TreeSet<>(new TreeSet(Comparator.comparing(Task::getStartTime,
+            Comparator.nullsLast(Comparator.naturalOrder())).thenComparing(Task::getId)));
 
     private void addToPrioritizedTasks(Task task) {
         if (task.getStartTime() != null) {
@@ -28,22 +29,22 @@ public class InMemoryTaskManager implements TaskManager {
         if (task.getStartTime() == null) {
             return false;
         }
-        LocalDateTime taskStart = task.getStartTime();
-        LocalDateTime taskEnd = taskStart.plus(task.getDuration());
-
-        for (Task prioritizedTask : prioritizedTasks) {
-            if (prioritizedTask.equals(task)) {
-                continue;
-            }
-
-            LocalDateTime prioritizedTaskStart = prioritizedTask.getStartTime();
-            LocalDateTime prioritizedTaskEnd = prioritizedTaskStart.plus(prioritizedTask.getDuration());
-
-            if (!(taskEnd.isBefore(prioritizedTaskStart) || taskStart.isAfter(prioritizedTaskEnd))) {
-                return true;
-            }
+        try {
+            return prioritizedTasks.stream()
+                    .anyMatch(existingTask -> !existingTask.equals(task) && isTasksIntersect(task, existingTask));
+        } catch (IllegalStateException e) {
+            System.err.println("Ошибка при проверке пересечения: " + e.getMessage());
+            return false;
         }
-        return false;
+    }
+
+    private boolean isTasksIntersect(Task task1, Task task2) {
+        LocalDateTime task1Start = task1.getStartTime();
+        LocalDateTime task1End = task1.getEndTime();
+        LocalDateTime task2Start = task2.getStartTime();
+        LocalDateTime task2End = task2.getEndTime();
+
+        return !(task1End.isBefore(task2Start) || task2End.isBefore(task1Start));
     }
 
     @Override
@@ -228,6 +229,7 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.remove(epic.getId());
         }
         for (Subtask subtask : subtasks.values()) {
+            prioritizedTasks.remove(subtask);
             historyManager.remove(subtask.getId());
         }
         subtasks.clear();
