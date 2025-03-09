@@ -1,5 +1,7 @@
 package tasks;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -7,15 +9,16 @@ import java.util.Objects;
 public class Epic extends Task {
 
     private List<Subtask> subtasks;
+    private LocalDateTime endTime;
 
     public Epic(String name, String description) {
-        super(name, description);
-        this.subtasks = new ArrayList<>();
+        this(name, description, LocalDateTime.now(), Duration.ofMinutes(0));
     }
 
-    public Epic(String name, String description, TaskStatus status) {
-        super(name, description, status);
+    public Epic(String name, String description, LocalDateTime startTime, Duration duration) {
+        super(name, description, TaskStatus.NEW, startTime, duration);
         this.subtasks = new ArrayList<>();
+        this.endTime = startTime.plus(duration);
     }
 
     public List<Subtask> getSubtasks() {
@@ -25,13 +28,38 @@ public class Epic extends Task {
     public void addSubtask(Subtask subtask) {
         subtasks.add(subtask);
         updateStatus();
+        updateEndTime();
     }
 
     public void removeSubtask(int subtask) {
         subtasks.remove(subtask);
         updateStatus();
+        updateEndTime();
     }
 
+    public void updateEndTime() {
+        if (subtasks.isEmpty()) {
+            endTime = getStartTime().plus(getDuration());
+            return;
+        }
+
+        LocalDateTime latestEndTime = subtasks.get(0).getStartTime().plus(subtasks.get(0).getDuration());
+        for (Subtask subtask : subtasks) {
+            LocalDateTime subtaskEndTime = subtask.getStartTime().plus(subtask.getDuration());
+            if (subtaskEndTime.isAfter(latestEndTime)) {
+                latestEndTime = subtaskEndTime;
+            }
+        }
+        endTime = latestEndTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
 
     public void updateStatus() {
         if (subtasks.isEmpty()) {
@@ -47,6 +75,50 @@ public class Epic extends Task {
             }
         }
         setStatus(newStatus);
+    }
+
+    private void updateEpicTime() {
+        if (subtasks.isEmpty()) {
+            setStartTime(LocalDateTime.now());
+            setDuration(Duration.ZERO);
+            return;
+        }
+
+        LocalDateTime earliestStart = null;
+        LocalDateTime latestEnd = null;
+
+        for (Subtask subtask : subtasks) {
+            LocalDateTime subtaskStart = subtask.getStartTime();
+            Duration subtaskDuration = subtask.getDuration();
+            LocalDateTime subtaskEnd = subtaskStart.plus(subtaskDuration);
+
+            if (earliestStart == null || subtaskStart.isBefore(earliestStart)) {
+                earliestStart = subtaskStart;
+            }
+
+            if (latestEnd == null || subtaskEnd.isAfter(latestEnd)) {
+                latestEnd = subtaskEnd;
+            }
+        }
+
+        setStartTime(earliestStart);
+        setDuration(Duration.between(earliestStart, latestEnd));
+    }
+
+    public LocalDateTime getStartTime() {
+        return super.getStartTime();
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        super.setStartTime(startTime);
+    }
+
+    public Duration getDuration() {
+        return super.getDuration();
+    }
+
+    public void setDuration(Duration duration) {
+        super.setDuration(duration);
     }
 
     @Override
@@ -71,12 +143,13 @@ public class Epic extends Task {
     @Override
     public String toString() {
         return "Epic{" +
-                "name='" + getName() + '\'' +
+                "id=" + getId() +
+                ", name='" + getName() + '\'' +
                 ", description='" + getDescription() + '\'' +
-                ", id=" + getId() +
                 ", status=" + getStatus() +
-                ", subtasks=" + subtasks +
+                ", startTime=" + getStartTime() +
+                ", duration=" + getDuration() +
+                ", subtasksCount=" + subtasks.size() +
                 '}';
     }
-
 }
