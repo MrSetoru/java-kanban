@@ -1,29 +1,44 @@
 package manager.http;
 
 import com.sun.net.httpserver.HttpServer;
+import manager.Managers;
+import manager.TaskManager;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
 public class HttpTaskServer {
+    private final HttpServer server;
+    private final TaskManager taskManager;
+    private static final int DEFAULT_PORT = 8080;
 
-    private static final int PORT = 8080;
+    public HttpTaskServer(TaskManager taskManager) throws IOException {
+        this(taskManager, DEFAULT_PORT);
+    }
 
-    public static void main(String[] args) throws IOException {
-        HttpTaskServer server = new HttpTaskServer();
+    public HttpTaskServer(TaskManager taskManager, int port) throws IOException {
+        this.taskManager = taskManager;
+        server = HttpServer.create(new InetSocketAddress(port), 0);
+        server.createContext("/tasks", new TasksHandler(taskManager));
+        server.createContext("/subtasks", new SubtasksHandler());
+        server.createContext("/epics", new EpicsHandler());
+        server.createContext("/history", new HistoryHandler());
+        server.createContext("/prioritized", new PrioritizedHandler());
+    }
+
+    public void start() {
+        System.out.println("Запускаем сервер на порту " + server.getAddress().getPort());
         server.start();
     }
 
-    public void start() throws IOException {
-        HttpServer httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
+    public void stop() {
+        System.out.println("Останавливаем сервер.");
+        server.stop(0);
+    }
 
-        httpServer.createContext("/tasks", new TasksHandler());
-        httpServer.createContext("/subtasks", new SubtasksHandler());
-        httpServer.createContext("/epics", new EpicsHandler());
-        httpServer.createContext("/history", new HistoryHandler());
-        httpServer.createContext("/prioritized", new PrioritizedHandler());
-
-        httpServer.start();
-        System.out.println("HTTP server started on port " + PORT);
+    public static void main(String[] args) throws IOException {
+        TaskManager taskManager = Managers.getDefault();
+        HttpTaskServer server = new HttpTaskServer(taskManager);
+        server.start();
     }
 }

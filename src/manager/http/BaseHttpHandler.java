@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import manager.TaskManager;
 import manager.http.Gson.DurationAdapter;
 import manager.http.Gson.LocalDateTimeAdapter;
 
@@ -15,10 +16,19 @@ import java.time.LocalDateTime;
 
 public class BaseHttpHandler implements HttpHandler {
 
+    protected TaskManager taskManager;
+
     protected final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .registerTypeAdapter(Duration.class, new DurationAdapter())
             .create();
+
+    public BaseHttpHandler(TaskManager taskManager) {
+        this.taskManager = taskManager;
+    }
+
+    public BaseHttpHandler() {
+    }
 
     protected void sendText(HttpExchange httpExchange, String text, int statusCode) throws IOException {
         byte[] resp = text.getBytes(StandardCharsets.UTF_8);
@@ -39,7 +49,7 @@ public class BaseHttpHandler implements HttpHandler {
 
     protected void handleInternalServerError(HttpExchange httpExchange, Exception e) throws IOException {
         System.err.println("Internal Server Error: " + e.getMessage());
-        e.printStackTrace(); // Выводим stack trace в консоль для отладки
+        e.printStackTrace();
         sendText(httpExchange, "Internal Server Error", 500);
     }
 

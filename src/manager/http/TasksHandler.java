@@ -16,7 +16,12 @@ import java.util.List;
 
 public class TasksHandler extends BaseHttpHandler {
 
-    private final TaskManager taskManager = Managers.getDefault();
+    private TaskManager taskManager = Managers.getDefault();
+
+    public TasksHandler(TaskManager taskManager) {
+        super(taskManager);
+        this.taskManager = taskManager;
+    }
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
